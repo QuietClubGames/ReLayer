@@ -181,7 +181,8 @@ def licenses():
 README = """ReLayer: an unofficial PC port of Fighting Layer (Arika, 1998)
 ===============================================================
 
-You need your own copy of the arcade ROM: the MAME set "fgtlayer.zip" (Fighting Layer, World, Ver. A).
+ReLayer does not include the game. You need your own legally obtained copy of the arcade ROM:
+the MAME set "fgtlayer.zip" (Fighting Layer, World, Ver. A).
 Any MAME version's set works: Setup checks the twelve ROM chips by checksum, whatever they are named.
 No game data comes with this download.
 

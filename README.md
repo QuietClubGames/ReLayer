@@ -15,18 +15,19 @@ own ROM. The long-term goal is a readable decompilation and a Sega Dreamcast ver
 1. Get the download from the [Releases](../../releases) page and unzip it anywhere.
 2. Run `Setup.exe`. Windows may say "Windows protected your PC" because Setup is not signed: choose
    **More info**, then **Run anyway**.
-3. Choose your ROM, the MAME set **`fgtlayer.zip`** (Fighting Layer, World, Ver. A), and press **Install**.
+3. Choose your own legally obtained copy of the ROM, the MAME set **`fgtlayer.zip`** (Fighting Layer, World,
+   Ver. A), and press **Install**.
    Any MAME version's set works: Setup checks the twelve ROM chips by checksum, whatever they are named.
    It builds the game in a minute or two and adds shortcuts. No administrator rights are needed.
 
-What you get:
+What ReLayer adds when it runs your copy of the game:
 
 - **High-resolution 3D** redrawn on your graphics card (up to 8x the arcade's resolution), without the
   original's wobbling polygons and warping textures, or the original picture (F9 switches).
 - **Window, borderless or exclusive full screen**, 4:3 or stretched, sharp / smooth / scanlines.
 - **Xbox-style controllers** (two players), keyboard, and button remapping in the menu.
-- **All characters selectable** from the start (the arcade released three of them over weeks), and the
-  arcade's operator settings (difficulty, timer, rounds, free play) in the menu.
+- The arcade's **operator settings** (difficulty, timer, rounds, free play) in the menu, and an option to make
+  the three time-release characters selectable from the start.
 
 ### The menu
 

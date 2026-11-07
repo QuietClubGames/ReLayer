@@ -5,7 +5,12 @@
 **Fighting Layer, rebuilt for Windows.**<br>
 An unofficial PC port of Arika's 1998 arcade fighter.
 
-**[Download](../../releases/latest)** · [Install](#install) · [The menu](#the-menu) · [Controls](#controls) · [FAQ](#faq) · [For developers](docs/DEVELOPING.md)
+[![Latest release](https://img.shields.io/github/v/release/QuietClubGames/ReLayer?label=download&style=for-the-badge&color=e8a33d)](../../releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/QuietClubGames/ReLayer/total?style=for-the-badge&color=4c8bf5)](../../releases)
+![Windows](https://img.shields.io/badge/Windows-10%20%2F%2011-0078D6?style=for-the-badge&logo=windows&logoColor=white)
+[![License: MIT](https://img.shields.io/badge/license-MIT-6e7781?style=for-the-badge)](LICENSE)
+
+**[Download](../../releases/latest)** · [Install](#install) · [The menu](#menu) · [Controls](#controls) · [FAQ](#faq) · [For developers](docs/DEVELOPING.md)
 
 </div>
 
@@ -14,7 +19,7 @@ An unofficial PC port of Arika's 1998 arcade fighter.
 > set `fgtlayer.zip` (Fighting Layer, World, Ver. A). Setup builds the game from it on your PC; the download
 > contains only ReLayer's own code and the open-source tools it uses.
 
-## What ReLayer adds
+## ✨ What ReLayer adds
 
 | | |
 |---|---|
@@ -24,7 +29,9 @@ An unofficial PC port of Arika's 1998 arcade fighter.
 | **Arcade settings** | Difficulty, damage, round timer, rounds and free play, all from an in-game menu, plus an option to unlock the three time-release characters from the start. |
 | **Native** | Not an emulator: the arcade code is recompiled into a Windows program. |
 
-## Install
+<a id="install"></a>
+
+## 📥 Install
 
 1. Download **`ReLayer-Setup.zip`** from the [latest release](../../releases/latest) and unzip it anywhere.
 2. Run **`Setup.exe`**.
@@ -37,7 +44,9 @@ An unofficial PC port of Arika's 1998 arcade fighter.
 
 To uninstall: **Windows Settings → Apps → ReLayer (Fighting Layer PC port) → Uninstall**.
 
-## The menu
+<a id="menu"></a>
+
+## ⚙️ The menu
 
 Press **Back + Start** together on a controller (View + Menu on newer Xbox pads), or **Tab** / **Esc** on the
 keyboard. The game pauses while the menu is open.
@@ -58,7 +67,9 @@ keyboard. The game pauses while the menu is open.
 | **Game** | Unlock all characters, free play, difficulty, damage, round timer, rounds and the arcade's other settings |
 | **System** | Resume, the arcade's operator menu, restart, quit |
 
-## Controls
+<a id="controls"></a>
+
+## 🎮 Controls
 
 Insert a coin, then press Start. With free play on, Start alone is enough. The first controller is player 1,
 the second is player 2.
@@ -78,7 +89,9 @@ the second is player 2.
 | F9 | High-resolution 3D on / off |
 | F2 | The arcade's test button (operator menu) |
 
-## FAQ
+<a id="faq"></a>
+
+## ❓ FAQ
 
 <details>
 <summary><b>Is this an emulator?</b></summary>
@@ -124,7 +137,7 @@ Open an [issue](../../issues) and attach `fgtlayer.log` from the install folder 
 `fgtlayer.old.log`).
 </details>
 
-## About
+## ℹ️ About
 
 ReLayer was made with Claude, Anthropic's AI model. Its source code is under the [MIT license](LICENSE),
 which covers ReLayer only, not the game. Building it yourself is described in

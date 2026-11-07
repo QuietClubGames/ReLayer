@@ -5,7 +5,7 @@ Copy this repository's files into the public ReLayer repository (a separate fold
     python tools/install/export_public.py D:/ReLayer
 
 Every tracked file is copied except the Street Fighter EX2 work (the extra-fighter tools and research notes,
-PRIVATE below), and README.md loses the parts between "<!-- private -->" and "<!-- /private -->". Files in the
+PRIVATE below), and the Markdown files lose the parts between "<!-- private -->" and "<!-- /private -->". Files in the
 target that are no longer exported are deleted; its .git folder is left alone, so the export can then be
 committed there as the next public version. The game's own extra-fighter code (src/game/ex_*.c, roster.c)
 stays: the game is built with it, and it does nothing without an extra fighter's files.
@@ -39,7 +39,7 @@ def main():
     for f in keep:
         src, dst = os.path.join(ROOT, f), os.path.join(dest, f)
         os.makedirs(os.path.dirname(dst), exist_ok=True)
-        if f == "README.md":
+        if f.endswith(".md"):
             text = open(src, encoding="utf-8").read()
             text = re.sub(r"<!-- private -->.*?<!-- /private -->\n?", "", text, flags=re.S)
             open(dst, "w", encoding="utf-8", newline="").write(text)

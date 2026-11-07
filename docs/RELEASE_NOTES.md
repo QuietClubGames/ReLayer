@@ -20,6 +20,23 @@ What ReLayer adds when it runs your copy of the game:
 - The arcade's operator settings (difficulty, timer, rounds, free play) in that menu, and an option to make
   the three time-release characters selectable from the start.
 
+**The menu:** press **Back + Start** together on a controller (View + Menu on newer Xbox pads), or **Tab** /
+**Esc** on the keyboard. The game pauses while it is open. Move with the D-pad, stick or arrow keys; choose
+with A or Enter; go back with B or Esc; switch pages with LB / RB or Q / E; close with Start or Tab.
+
+**Controls:** insert a coin, then press Start (with free play on, Start alone is enough).
+
+| | Controller | Keyboard, player 1 | Keyboard, player 2 |
+|---|---|---|---|
+| Move | D-pad or left stick | arrow keys | I J K L |
+| Punch light / medium / heavy | X / Y / RB | Z / X / C | Q / W / E |
+| Kick light / medium / heavy | A / B / RT | A / S / D | R / T / Y |
+| Start | Start | 1 | 2 |
+| Insert coin | Back | 5 | 6 |
+
+Alt+Enter or F11: full screen. F9: high-resolution 3D on / off. Buttons can be remapped in the menu's
+Controls page.
+
 Known limits:
 
 - Only Xbox-style (XInput) controllers are recognised. PlayStation controllers work through Steam or a tool

@@ -64,7 +64,7 @@ int settings_load(Settings *s, const char *path) {
 int settings_save(const Settings *s, const char *path) {
     FILE *f = fopen(path, "w");
     if (!f) return 0;
-    fprintf(f, "# Fighting Layer settings (written by the in-game menu: Tab / Esc, or Back + Start on a pad)\n");
+    fprintf(f, "# ReLayer settings (written by the in-game menu: Tab / Esc, or Back + Start on a pad)\n");
     for (unsigned i = 0; i < sizeof k_fields / sizeof k_fields[0]; i++)
         fprintf(f, "%s = %d\n", k_fields[i].key, *(const int *)((const char *)s + k_fields[i].ofs));
     fclose(f);

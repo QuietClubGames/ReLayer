@@ -374,7 +374,7 @@ static void draw_menu(float vw, float vh) {
     uip_rect(px + 40, py, W - 80, 2, 1, fade(0xE8B64C00u | 0x70, a), fade(0xE8B64C00u | 0x70, a), 0, 0, 0);
 
     /* header */
-    uip_text(px + 58, py + 38, UI_FONT_TITLE, fade(COL_TEXT, a), "FIGHTING LAYER");
+    uip_text(px + 58, py + 38, UI_FONT_TITLE, fade(COL_TEXT, a), "RELAYER");
     uip_rect(px + 60, py + 100, 70, 4, 2, fade(COL_GOLD, a), fade(COL_GOLD, a), 0, 0, 0);
     {
         const char *p = "PAUSED";

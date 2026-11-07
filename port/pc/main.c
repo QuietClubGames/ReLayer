@@ -566,6 +566,21 @@ static void ui_demo(const char *prefix) {
         rt_log("ui demo done");
         exit(0);
     }
+    if (getenv("FGT_UI_DEMO_MENU")) {              /* just the menu open over the game: one picture per page */
+        ui_menu_toggle(UI_DEV_PAD);
+        demo_frames(45);
+        demo_shot(prefix, "menu_display");
+        for (int k = 0; k < 4; k++) {
+            static const char *pages[] = {"menu_audio", "menu_controls", "menu_game", "menu_system"};
+            ui_key(UI_NEXT_TAB, UI_DEV_PAD);
+            demo_frames(30);
+            demo_shot(prefix, pages[k]);
+        }
+        g_settings = saved;
+        settings_save(&g_settings, "settings.ini");
+        rt_log("ui demo done");
+        exit(0);
+    }
     if (getenv("FGT_UI_DEMO_FILTER")) {            /* the menu's screen filter: Sharp -> Smooth -> Scanlines -> Sharp */
         static const char *names[] = {"f1_smooth", "f2_scanlines", "f3_sharp"};
         if (getenv("FGT_UI_DEMO_FILTER")[0] == 'b') { video_apply_display(DISPLAY_BORDERLESS, saved.window_size, 0); demo_frames(90); }

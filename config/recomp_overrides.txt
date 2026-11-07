@@ -1,0 +1,54 @@
+# Recompiled functions replaced by hand-written C in src/ (the recompiled code stays available as f_<addr>_orig).
+# Format: <unit> <hex address>   # what it is
+main 802B3F98   # hours elapsed since the character-release start date (src/game/release.c)
+main 802224F4   # load a file from the ROM file table (src/game/file_override.c)
+main 80216FF0   # pose finish (mirroring): EX2 characters mirrored as a whole (src/game/ex_mirror.c)
+main 802069CC   # draw a fighter's parts: NCLIP inverted for mirrored EX2 characters (src/game/ex_mirror.c)
+main 802B6088   # draw a fighter's skin (same)
+main 802B639C   # draw a fighter's skin (same)
+pl00_1 800A55E4   # Kato: headband tails effect, skipped for converted characters (src/game/ex_mirror.c)
+pl00_2 800B55E4   # the same in slot 2
+pl00_1 800A4EC8   # Kato: cloth effect, skipped for converted characters (src/game/ex_mirror.c)
+pl00_2 800B4EC8   # the same in slot 2
+pl00_1 8009FEB4   # Kato: normal attacks; Pullum's own moves (src/game/ex_pullum.c)
+pl00_2 800AFEB4   # the same in slot 2
+pl00_1 800A0A9C   # Kato: commands; Pullum's own (src/game/ex_pullum.c)
+pl00_2 800B0A9C   # the same in slot 2
+pl00_1 800A0E8C   # Kato: special-move dispatcher; Pullum's own specials (src/game/ex_pullum.c)
+pl00_2 800B0E8C   # the same in slot 2
+pl00_1 800A3414   # Kato: throws; Pullum's own ground throws (src/game/ex_pullum.c)
+pl00_2 800B3414   # the same in slot 2
+pl00_1 800A3E4C   # Kato: win poses; Pullum's own (src/game/ex_pullum.c)
+pl00_2 800B3E4C   # the same in slot 2
+main 80216EE4   # hand shapes: no left/right swap for converted characters (src/game/ex_mirror.c)
+main 802173C4   # motion blend start: the saved pose un-reflected for converted characters (src/game/ex_mirror.c)
+main 8021F364   # body hurt spheres: reflected offsets for converted characters (src/game/ex_mirror.c)
+main 8021F704   # attack spheres: the same
+main 8021F978   # clash spheres: the same
+main 802A9FCC   # select cursor right: extra fighter spot (src/game/roster.c)
+main 802A9D54   # select cursor left (same)
+main 802AA24C   # select confirm (same)
+main 802B46EC   # load a fighter's files: marks the extra fighter (same)
+main 802B4E80   # load a fighter's code block (same)
+main 8029C358   # set up a fighter's model and skeleton (same)
+main 802A794C   # select screen state machine: resets extra-fighter picks (src/game/roster.c)
+main 802AA6F4   # select portrait: the extra fighter's own (src/game/roster.c)
+main 802A8208   # select screen names (same)
+main 802AAF0C   # select screen names (same)
+main 80203254   # VS screen names (same)
+main 80202180   # arcade stage map and arcade VS screen: her name (src/game/roster.c)
+main 802ABB84   # arcade ladder builder: the extra fighter as a regular opponent (src/game/roster.c)
+main 80203E58   # VS screen portrait (same)
+main 80203FE0   # VS screen portrait (same)
+main 8020FF04   # fight HUD name plates: the extra fighter's own (same)
+main 802A3C48   # attract demo set-up: forget the extra fighter picks (src/game/roster.c)
+main 8022A540   # big-object update: Pullum's objects (src/game/ex_pullum.c)
+main 802A0CB8   # a character's voice: Pullum's own on her side (src/game/ex_pullum.c)
+main 802A0D8C   # the same, with a level
+main 802144B0   # the shared motion banks: Pullum's generic motions on her side (src/game/ex_pullum.c)
+main 802145F0   # motion set: Pullum's own banks 0-1 even when told to use the opponent's (src/game/ex_pullum.c)
+main 8021483C   # motion set with a frame count: the same
+main 80216234   # motion steps: the same
+main 80216A70   # the same
+main 80215E98   # the same
+main 80215284   # the same

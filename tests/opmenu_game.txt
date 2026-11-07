@@ -1,0 +1,8 @@
+# Operator menu -> GAME OPTIONS (cursor starts on DISPLAY TEST)
+900 10 test
+1000 4 p1.down
+1020 4 p1.down
+1040 4 p1.down
+1080 shot screenshots/op_cursor
+1100 6 p1.b1
+1160 shot screenshots/op_game

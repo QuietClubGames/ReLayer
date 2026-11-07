@@ -1,0 +1,10 @@
+# Operator menu -> COIN OPTIONS
+900 10 test
+1000 4 p1.down
+1020 4 p1.down
+1040 4 p1.down
+1060 4 p1.down
+1080 4 p1.down
+1100 shot screenshots/op_cursor2
+1120 6 p1.b1
+1180 shot screenshots/op_coin

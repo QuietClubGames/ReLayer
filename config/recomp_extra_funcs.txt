@@ -1,0 +1,3 @@
+# Extra entry points for the recompiler, found at runtime (the game writes new ones to missing_entries.txt).
+# Format: <unit> <hex address>   unit = main, or an overlay like pl00_1
+main 802D1378   # libetc interrupt handler: resumes after setjmp() when the kernel takes an interrupt

@@ -1,0 +1,6 @@
+1500 6 coin1
+1505 shot screenshots/w_1505
+1515 shot screenshots/w_1515
+1530 shot screenshots/w_1530
+1560 shot screenshots/w_1560
+1590 shot screenshots/w_1590

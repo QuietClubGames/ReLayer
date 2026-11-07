@@ -1,0 +1,12 @@
+# Coin, start, move the cursor right twice, confirm with button 1, then wait for the fight.
+1500 6 coin1
+1600 6 p1.start
+1760 4 p1.right
+1790 4 p1.right
+1810 shot screenshots/t_sel_moved
+1830 6 p1.b1
+1900 shot screenshots/t_sel_after
+2100 shot screenshots/t_2100
+2400 shot screenshots/t_2400
+2700 shot screenshots/t_2700
+3000 shot screenshots/t_3000

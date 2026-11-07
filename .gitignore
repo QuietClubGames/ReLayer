@@ -1,0 +1,33 @@
+# ROM data and anything derived from it: never commit
+*.zip
+rom/
+ex2rom/
+ex2prom/
+ex2mod/
+extra/
+SFEX GAMES/
+baserom/
+assets/
+assets_split/
+asm/
+build/
+work/
+config/undefined_*_auto*.txt
+config/ovl.yaml
+.splache
+__pycache__/
+# runtime output
+fgtlayer.log
+fgtlayer.old.log
+*.bmp
+eeprom.bin
+missing_entries.txt
+screenshots/
+*.wav
+settings.ini
+
+# Setup package (tools/install/make_package.py)
+dist/
+tools/install/fgtlayer.ico
+menu_art.*
+art/

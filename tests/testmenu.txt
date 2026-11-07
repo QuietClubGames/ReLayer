@@ -1,0 +1,6 @@
+# Operator test button during attract mode.
+900 10 test
+1000 shot screenshots/testmenu
+1100 4 p1.down
+1110 4 p1.down
+1140 shot screenshots/testmenu_moved

@@ -1,0 +1,8 @@
+# Arcade against the last boss (Vold, character 0x11) on his stage (12, the dragon-wall room): the CPU opponent and the stage are
+# set at frame 2012, so poke them right after. Checks the boss code block (pl11) loads and runs.
+1500 6 coin1
+1600 6 p1.start
+1900 6 p1.b1
+2013 poke 8034BC7E=17
+2013 poke 8033542C=12
+2800 shot screenshots/boss_vold

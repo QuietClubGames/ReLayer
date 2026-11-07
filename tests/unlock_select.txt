@@ -1,0 +1,15 @@
+# With "Unlock all characters" (the default), the roster scrolls to reveal Ajax, Clemence and Joe.
+1500 6 coin1
+1600 6 p1.start
+1760 shot screenshots/unlock_select
+1780 4 p1.right
+1800 4 p1.right
+1820 4 p1.right
+1840 4 p1.right
+1860 4 p1.right
+1880 4 p1.right
+1900 4 p1.right
+1920 shot screenshots/unlock_right7
+1940 4 p1.right
+1960 4 p1.right
+1980 shot screenshots/unlock_right9

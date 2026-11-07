@@ -1,0 +1,7 @@
+# Two players: both coin up and press start; P2 moves their cursor left.
+1500 6 coin1
+1510 6 coin2
+1600 6 p1.start
+1640 6 p2.start
+1700 4 p2.left
+1760 shot screenshots/p2_select

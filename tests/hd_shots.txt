@@ -1,0 +1,10 @@
+# Screens for comparing the high-resolution renderer with the software one (run windowed).
+900 shot screenshots/hd_arika
+1500 6 coin1
+1600 6 p1.start
+1700 shot screenshots/hd_select
+1760 4 p1.right
+1790 4 p1.right
+1830 6 p1.b1
+2400 shot screenshots/hd_fight1
+2606 shot screenshots/hd_fight2

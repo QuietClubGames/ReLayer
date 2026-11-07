@@ -1,0 +1,5 @@
+# Free play from the pause menu: no coin, Start alone begins a game.
+900 set free_play=1
+1300 shot screenshots/freeplay_title
+1600 6 p1.start
+1760 shot screenshots/freeplay_select

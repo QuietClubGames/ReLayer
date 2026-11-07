@@ -1,0 +1,19 @@
+# Press each of the six buttons alone in a match (as Lan) to see which ones the game uses.
+1500 6 coin1
+1600 6 p1.start
+1760 4 p1.right
+1790 4 p1.right
+1830 6 p1.b1
+2380 shot screenshots/btn_idle
+2420 4 p1.b1
+2428 shot screenshots/btn_b1
+2490 4 p1.b2
+2498 shot screenshots/btn_b2
+2560 4 p1.b3
+2568 shot screenshots/btn_b3
+2630 4 p1.b4
+2638 shot screenshots/btn_b4
+2700 4 p1.b5
+2708 shot screenshots/btn_b5
+2770 4 p1.b6
+2778 shot screenshots/btn_b6

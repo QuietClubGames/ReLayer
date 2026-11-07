@@ -1,0 +1,8 @@
+# Operator test menu -> SWITCH TEST, then press a few inputs to see them light up.
+900 10 test
+1000 4 p1.down
+1040 6 p1.b1
+1060 6 p1.start
+1100 shot screenshots/sw_0
+1110 30 p1.b1
+1125 shot screenshots/sw_b1

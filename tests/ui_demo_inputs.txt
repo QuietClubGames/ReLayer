@@ -1,0 +1,6 @@
+# Coin, start, move the cursor right twice, confirm with button 1, then wait for the fight.
+1500 6 coin1
+1600 6 p1.start
+1760 4 p1.right
+1790 4 p1.right
+1830 6 p1.b1

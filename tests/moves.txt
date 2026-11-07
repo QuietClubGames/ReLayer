@@ -1,0 +1,19 @@
+# Get into a fight as Lan, then exercise movement and attacks.
+1500 6 coin1
+1600 6 p1.start
+1760 4 p1.right
+1790 4 p1.right
+1830 6 p1.b1
+2380 shot screenshots/m0_idle
+2400 60 p1.right
+2455 shot screenshots/m1_walked
+2480 30 p1.left
+2500 shot screenshots/m2_back
+2530 6 p1.up
+2548 shot screenshots/m3_jump
+2600 4 p1.b1
+2606 shot screenshots/m4_punch
+2640 4 p1.b2
+2646 shot screenshots/m5_kick
+2680 20 p1.down
+2695 shot screenshots/m6_crouch

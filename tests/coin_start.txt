@@ -1,0 +1,8 @@
+# Insert a coin during the attract mode, press start, look at what follows.
+1490 shot screenshots/t_before_coin
+1500 6 coin1
+1530 shot screenshots/t_after_coin
+1600 6 p1.start
+1640 shot screenshots/t_start_40
+1720 shot screenshots/t_start_120
+1900 shot screenshots/t_start_300

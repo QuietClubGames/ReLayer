@@ -1,0 +1,38 @@
+# splat config for the Fighting Layer main executable (Namco System 12, PsyQ 4.x era)
+name: Fighting Layer (World, Ver. A)
+sha1: b230f04dd3736eda63190231b10d5a2c7b743df1
+options:
+  basename: main
+  target_path: baserom/main.bin
+  base_path: ..
+  platform: psx
+  compiler: GCC
+  gp_value: 0x8030B958
+  asm_path: asm/main
+  src_path: src/main
+  build_path: build
+  asset_path: assets_split
+  ld_script_path: build/main.ld
+  symbol_addrs_path: config/symbol_addrs.txt
+  undefined_funcs_auto_path: config/undefined_funcs_auto.txt
+  undefined_syms_auto_path: config/undefined_syms_auto.txt
+  find_file_boundaries: true
+  use_legacy_include_asm: false
+  section_order: [".text", ".data", ".rodata", ".sdata", ".bss"]
+  asm_jtbl_label_macro: jlabel
+  migrate_rodata_to_functions: true
+  string_encoding: ASCII
+  data_string_encoding: ASCII
+  rodata_string_guesser_level: 2
+  data_string_guesser_level: 2
+segments:
+  - name: main
+    type: code
+    start: 0x0
+    vram: 0x801F0000
+    bss_size: 0x61B50
+    subsegments:
+      - [0x0, asm]
+      - [0xE5C84, data]
+      - { start: 0x11B958, type: bss, vram: 0x8030B958 }
+  - [0x11B958]

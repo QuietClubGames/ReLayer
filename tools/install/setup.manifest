@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
-  <assemblyIdentity type="win32" name="FightingLayer.Setup" version="1.0.0.0"/>
-  <description>Fighting Layer Setup</description>
+  <assemblyIdentity type="win32" name="QuietClubGames.ReLayer.Setup" version="0.1.2.0"/>
+  <description>ReLayer Setup</description>
   <dependency>
     <dependentAssembly>
       <assemblyIdentity type="win32" name="Microsoft.Windows.Common-Controls" version="6.0.0.0"

@@ -1,5 +1,18 @@
 # ReLayer release notes
 
+## 0.1.2
+
+The same game as 0.1.1; only the installer changed. Some antivirus programs, Windows Defender included,
+blocked 0.1.1's `Setup.exe` as "Program:Win32/Contebrew.A!ml". That is an automatic guess about new,
+unsigned programs, not a virus found in the file.
+
+- `Setup.exe` and `ReLayer.exe` now carry the usual Windows version details (publisher, product name,
+  version; right-click → Properties → Details), which makes them look less like unknown programs to
+  antivirus checks.
+- If Windows Defender still blocks Setup: open **Windows Security → Virus & threat protection → Protection
+  history**, choose the entry for `Setup.exe`, then **Actions → Allow on device**, and run Setup again.
+  Please don't turn your antivirus off.
+
 ## 0.1.1
 
 Fixes for freezes. Updating is recommended: install it over 0.1.0 (settings are kept).

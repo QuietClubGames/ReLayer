@@ -16,6 +16,7 @@ menu_art.png in the repo root, if present, becomes the menu art, the Setup banne
 import importlib.metadata as md
 import os
 import shutil
+import re
 import subprocess
 import sys
 import zipfile
@@ -88,6 +89,44 @@ def make_icon():
     return ico
 
 
+SETUP_VERSIONINFO = """
+1 VERSIONINFO
+FILEVERSION %(n)s
+PRODUCTVERSION %(n)s
+FILEOS 0x40004
+FILETYPE 0x1
+BEGIN
+  BLOCK "StringFileInfo"
+  BEGIN
+    BLOCK "040904B0"
+    BEGIN
+      VALUE "CompanyName", "QuietClubGames"
+      VALUE "FileDescription", "ReLayer Setup"
+      VALUE "FileVersion", "%(v)s"
+      VALUE "InternalName", "Setup"
+      VALUE "LegalCopyright", "ReLayer code: MIT license. Fighting Layer is a trademark of its owners."
+      VALUE "OriginalFilename", "Setup.exe"
+      VALUE "ProductName", "ReLayer"
+      VALUE "ProductVersion", "%(v)s"
+    END
+  END
+  BLOCK "VarFileInfo"
+  BEGIN
+    VALUE "Translation", 0x409, 1200
+  END
+END
+"""
+
+
+def release_version():
+    """The release number, from the ProductVersion line of game.rc (the one place it is written)."""
+    with open(os.path.join(HERE, "game.rc")) as f:
+        m = re.search(r'VALUE "ProductVersion", "([0-9.]+)"', f.read())
+    if not m:
+        sys.exit("game.rc has no ProductVersion")
+    return m.group(1)
+
+
 def build_setup_exe(tc, ico):
     clang = os.path.join(tc, "bin", "i686-w64-mingw32-clang.exe")
     windres = os.path.join(tc, "bin", "llvm-windres.exe")
@@ -98,9 +137,14 @@ def build_setup_exe(tc, ico):
         if ico:
             f.write('1 ICON "%s"\n' % ico.replace("\\", "/"))
         f.write('1 24 "%s"\n' % os.path.join(HERE, "setup.manifest").replace("\\", "/"))
+        # version details (publisher, product, version) as Windows shows them under Properties > Details; an
+        # exe without them looks like throwaway malware to antivirus heuristics. The version comes from game.rc.
+        v = release_version()
+        n = ",".join((v.split(".") + ["0", "0", "0"])[:4])
+        f.write(SETUP_VERSIONINFO % {"n": n, "v": v})
     res = os.path.join(tmp, "setup_res.o")
     subprocess.check_call([windres, "--no-preprocess", "--target=pe-i386", rc, "-O", "coff", "-o", res])
-    subprocess.check_call([clang, "-O2", "-municode", "-mwindows", "-Wall"] + (["-DNO_EXTRA"] if PUBLIC else []) +
+    subprocess.check_call([clang, "-O2", "-s", "-municode", "-mwindows", "-Wall"] + (["-DNO_EXTRA"] if PUBLIC else []) +
                           [os.path.join(HERE, "setup_win32.c"), res,
                            "-o", os.path.join(OUT, "Setup.exe"), "-lcomctl32", "-lcomdlg32", "-lshell32", "-lole32",
                            "-luuid", "-lwindowscodecs", "-lgdi32", "-luser32", "-ladvapi32"])

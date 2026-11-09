@@ -38,7 +38,9 @@ An unofficial PC port of Arika's 1998 arcade fighter.
 
 > [!NOTE]
 > Setup isn't code-signed, so Windows may show **"Windows protected your PC"**. Choose **More info**, then
-> **Run anyway**.
+> **Run anyway**. If Windows Defender blocks it as "Program:Win32/Contebrew" (an automatic guess about new,
+> unsigned programs, not a virus found in it): **Windows Security → Virus & threat protection → Protection
+> history**, choose the `Setup.exe` entry, then **Actions → Allow on device**, and run Setup again.
 
 To uninstall: **Windows Settings → Apps → ReLayer (Fighting Layer PC port) → Uninstall**.
 

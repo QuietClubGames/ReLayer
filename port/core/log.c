@@ -21,8 +21,17 @@ static FILE *logf_get(void) {
 #define LOG_LIMIT (64L << 20)
 static long g_log_bytes;
 
+/* Close the log for good (before starting a new copy of the game, which renames it to fgtlayer.old.log:
+ * Windows can't rename a file that is still open). */
+static int g_log_closed;
+void rt_log_close(void) {
+    if (g_logf && g_logf != stderr) fclose(g_logf);
+    g_logf = NULL;
+    g_log_closed = 1;
+}
+
 void rt_log(const char *fmt, ...) {
-    if (g_log_bytes > LOG_LIMIT) return;
+    if (g_log_bytes > LOG_LIMIT || g_log_closed) return;
     va_list ap;
     va_start(ap, fmt);
     int n = vfprintf(logf_get(), fmt, ap);

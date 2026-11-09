@@ -8,6 +8,7 @@
 #define CINTERFACE
 #include <initguid.h>
 #include <windows.h>
+#include <stdlib.h>
 #include <d3d11.h>
 #include <dxgi1_2.h>
 #include <string.h>
@@ -33,6 +34,8 @@ void ui_d3d_render(int w, int h);
 void ui_d3d_release(void);
 void d3d_request_backbuffer_save(const char *path) { g_save_backbuffer = path; }
 static int tex_w, tex_h, buf_w, buf_h;
+static int g_warp;             /* the software device: no high-resolution renderer (far too slow there) */
+static int g_need_resize;      /* entering or leaving exclusive full screen: the buffers must be resized before the next Present */
 static HWND wnd;
 static UINT sync_interval;
 
@@ -54,6 +57,9 @@ static const char k_shader[] =
     "  return float4(c, 1); }\n";
 
 static void release_all(void) {
+    /* unbind everything and flush, or the swap chain's destruction is deferred and a new one for the same
+     * window is refused (E_ACCESSDENIED) */
+    if (ctx) { ID3D11DeviceContext_ClearState(ctx); ID3D11DeviceContext_Flush(ctx); }
     if (srv) ID3D11ShaderResourceView_Release(srv);
     if (tex) ID3D11Texture2D_Release(tex);
     if (rtv) ID3D11RenderTargetView_Release(rtv);
@@ -65,7 +71,8 @@ static void release_all(void) {
     if (blit_cb) { ID3D11Buffer_Release(blit_cb); blit_cb = NULL; }
     if (ps) ID3D11PixelShader_Release(ps);
     if (vs) ID3D11VertexShader_Release(vs);
-    if (swap) IDXGISwapChain1_Release(swap);
+    if (swap) { IDXGISwapChain1_SetFullscreenState(swap, FALSE, NULL); IDXGISwapChain1_Release(swap); }   /* never release it full screen */
+    if (ctx) { ID3D11DeviceContext_ClearState(ctx); ID3D11DeviceContext_Flush(ctx); }   /* destroys it now */
     if (ctx) ID3D11DeviceContext_Release(ctx);
     if (dev) ID3D11Device_Release(dev);
     srv = NULL; tex = NULL; rtv = NULL; samp = NULL; ps = NULL; vs = NULL; swap = NULL; ctx = NULL; dev = NULL;
@@ -141,7 +148,7 @@ static int compile(D3DCompileFn fn, const char *entry, const char *target, ID3DB
 
 /* ---- graphics cards ---- */
 #define MAX_GPUS 8
-static char g_gpu_names[MAX_GPUS][96];
+static char g_gpu_names[MAX_GPUS][400];       /* adapter descriptions are up to 128 UTF-16 characters */
 static int g_ngpus, g_gpu_listed;
 static IDXGIAdapter1 *g_gpus[MAX_GPUS];
 static SIZE_T g_gpu_vram[MAX_GPUS];
@@ -185,11 +192,19 @@ int d3d_init(HWND hwnd, int refresh_hz, int gpu) {
     if (!d3dcompile) { rt_log("d3d11: d3dcompiler_47.dll not found"); return 0; }
 
     D3D_FEATURE_LEVEL want[] = {D3D_FEATURE_LEVEL_11_0, D3D_FEATURE_LEVEL_10_1, D3D_FEATURE_LEVEL_10_0};
-    if (FAILED(D3D11CreateDevice(chosen, chosen ? D3D_DRIVER_TYPE_UNKNOWN : D3D_DRIVER_TYPE_HARDWARE, NULL, 0, want, 3,
-                                 D3D11_SDK_VERSION, &dev, NULL, &ctx)) &&
-        FAILED(D3D11CreateDevice(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, 0, want, 3, D3D11_SDK_VERSION, &dev, NULL, &ctx))) {
-        rt_log("d3d11: no hardware device");
-        return 0;
+    g_warp = 0;
+    if (getenv("FGT_FORCE_WARP") ||
+        (FAILED(D3D11CreateDevice(chosen, chosen ? D3D_DRIVER_TYPE_UNKNOWN : D3D_DRIVER_TYPE_HARDWARE, NULL, 0, want, 3,
+                                  D3D11_SDK_VERSION, &dev, NULL, &ctx)) &&
+         FAILED(D3D11CreateDevice(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, 0, want, 3, D3D11_SDK_VERSION, &dev, NULL, &ctx)))) {
+        /* no usable graphics card (old driver, virtual machine...): Windows' own software Direct3D still shows
+         * the game and the menu, just without the high-resolution renderer */
+        if (FAILED(D3D11CreateDevice(NULL, D3D_DRIVER_TYPE_WARP, NULL, 0, want, 3, D3D11_SDK_VERSION, &dev, NULL, &ctx))) {
+            rt_log("d3d11: no hardware device, and no software (WARP) device either");
+            return 0;
+        }
+        g_warp = 1;
+        rt_log("d3d11: no usable graphics card; using Windows' software renderer (WARP), original graphics only");
     }
     IDXGIDevice1 *dxdev = NULL;
     IDXGIAdapter *adapter = NULL;
@@ -206,7 +221,7 @@ int d3d_init(HWND hwnd, int refresh_hz, int gpu) {
     {
         DXGI_ADAPTER_DESC ad;
         if (SUCCEEDED(IDXGIAdapter_GetDesc(adapter, &ad))) {
-            char name[128];
+            char name[400];
             WideCharToMultiByte(CP_UTF8, 0, ad.Description, -1, name, sizeof name, NULL, NULL);
             rt_log("d3d11: graphics adapter: %s", name);
         }
@@ -255,7 +270,7 @@ int d3d_vsync(void) { return swap && sync_interval; }
 /* Exclusive full screen: the swap chain takes over the monitor (falls back to borderless if refused). */
 int d3d_set_exclusive(int on, HMONITOR monitor) {
     if (!swap) return 0;
-    if (!on) { IDXGISwapChain1_SetFullscreenState(swap, FALSE, NULL); return 1; }
+    if (!on) { IDXGISwapChain1_SetFullscreenState(swap, FALSE, NULL); g_need_resize = 1; return 1; }
     IDXGIDevice *dx = NULL;
     IDXGIAdapter *ad = NULL;
     IDXGIOutput *out = NULL, *match = NULL;
@@ -271,6 +286,7 @@ int d3d_set_exclusive(int on, HMONITOR monitor) {
     if (ad) IDXGIAdapter_Release(ad);
     if (dx) IDXGIDevice_Release(dx);
     if (FAILED(hr)) { rt_log("d3d11: exclusive full screen refused (%08lX)", (unsigned long)hr); return 0; }
+    g_need_resize = 1;             /* DXGI requires ResizeBuffers after a full-screen change, or Present fails */
     return 1;
 }
 
@@ -333,7 +349,8 @@ int d3d_picture_height(void) {
 static int follow_resize(void) {
     RECT cr;
     GetClientRect(wnd, &cr);
-    if (cr.right > 0 && cr.bottom > 0 && (cr.right != buf_w || cr.bottom != buf_h)) {
+    if (cr.right > 0 && cr.bottom > 0 && (cr.right != buf_w || cr.bottom != buf_h || g_need_resize)) {
+        g_need_resize = 0;
         /* ResizeBuffers fails while anything still refers to the old buffers, bound views included */
         ID3D11DeviceContext_ClearState(ctx);
         if (rtv) { ID3D11RenderTargetView_Release(rtv); rtv = NULL; }
@@ -407,6 +424,15 @@ int d3d_blit_and_present(ID3D11ShaderResourceView *picture, int linear) {
     if (g_save_backbuffer) { save_backbuffer(g_save_backbuffer); g_save_backbuffer = NULL; }
     HRESULT hr = IDXGISwapChain1_Present(swap, sync_interval, 0);
     if (SUCCEEDED(hr)) track_repeats();
+    if (FAILED(hr) && hr != DXGI_ERROR_DEVICE_REMOVED && hr != DXGI_ERROR_DEVICE_RESET) {
+        /* the swap chain is in a bad state (e.g. after a full-screen change): make a new one and carry on */
+        static int retries;
+        if (retries < 20 && recreate_swapchain()) {
+            retries++;
+            rt_log("d3d11: present failed (%08lX); made a new swap chain", (unsigned long)hr);
+            return 1;
+        }
+    }
     if (FAILED(hr)) {
         rt_log("d3d11: present failed (%08lX), switching to GDI", (unsigned long)hr);
         release_all();
@@ -428,6 +454,7 @@ int d3d_present(const uint32_t *rgb, int w, int h) {
 /* High-resolution path: redraw the recorded frame on the GPU, then present it. */
 int d3d_present_hd(const HdFrame *f) {
     if (!swap || !follow_resize()) return 0;
+    if (g_warp) return -1;
     ID3D11ShaderResourceView *pic = hd_d3d_render(f);
     if (!pic) return -1;           /* couldn't: caller uses the software picture */
     return d3d_blit_and_present(pic, 1);

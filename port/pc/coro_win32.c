@@ -27,3 +27,9 @@ Coro *coro_create(void (*fn)(void *), void *arg, size_t stack_size) {
 }
 
 void coro_switch(Coro *to) { SwitchToFiber(to->fiber); }
+
+void coro_destroy(Coro *c) {
+    if (!c || c == &g_main_coro) return;
+    DeleteFiber(c->fiber);
+    free(c);
+}

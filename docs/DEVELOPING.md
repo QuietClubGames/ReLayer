@@ -148,6 +148,26 @@ The previous run's log is kept as `fgtlayer.old.log`.
 | `tests/freeplay.txt` | turning free play on while the game runs: Start alone begins a game |
 | `tests/boss_vold.txt` | arcade against the last boss on his stage (forced with `poke`) |
 | `tests/opmenu_game.txt`, `tests/opmenu_coin.txt` | the operator menu's GAME and COIN pages |
+| `tests/stress_fight.txt` | a long fight with player 1 attacking, for the hang tests below (run windowed) |
+
+Hang tests (windowed, with `--script tests/stress_fight.txt`; they change `settings.ini`, so keep a copy):
+
+- `FGT_STRESS=2400:300`: 300 random switches (F11, menu display mode, menu open/close, F9) during the fight.
+- `FGT_STRESS=2400:1 FGT_STRESS_SWEEP=1`: every option of the Display, Audio, Controls and Game pages, through the keyboard.
+- `FGT_STRESS=2400:1 FGT_STRESS_COMBOS=1`: every display mode × graphics/quality × filter × shape, then minimise and
+  restore and focus away and back in exclusive full screen (`FGT_STRESS_ALTTAB=1` for only the focus part).
+- `FGT_STRESS=2420:1 FGT_STRESS_KEYS=09,51,28,0D`: keys (hex virtual-key codes) one every 20 frames; this one opens
+  the operator menu from the System page.
+
+Soak test (headless, many at once, each in its own folder with `--rom <repo>/baserom`): arcade runs with player 1
+mashing (`set free_play=1`, `set difficulty=1`, `set damage=8`, Start pressed every 700 frames), optionally with
+`poke 8034D7C0=1` every 90 frames (the computer opponent's health, so every hit wins and the run reaches the
+boss and ending), and screenshots every 1,500-2,500 frames: two identical screenshots in a row mean the game
+stopped. This found the CloseTh slot leak (black screen after a few stages).
+
+The game has a hang watchdog (`port/pc/watchdog.c`): if no frame reaches the screen for 3 seconds it writes the
+state and where the main thread is (`fgtlayer.exe+offset` and return addresses) to `fgtlayer.log`. Resolve the
+offsets against `nm -n` of the same exe (base 0x400000). `FGT_TEST_HANG=<frame>` stalls 5 seconds to check it.
 
 Run it from the repo root (it reads `baserom/`; an installed copy reads `rom/` next to the exe). It writes
 `fgtlayer.log` (everything the runtime noticed) and `eeprom.bin` (cabinet settings); headless runs also write

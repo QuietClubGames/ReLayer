@@ -5,9 +5,11 @@
 #include <windows.h>
 #include <mmsystem.h>
 #include <string.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 #include "../core/log.h"
+#include "watchdog.h"
 
 static HWND g_wnd;
 static int g_closing;
@@ -48,6 +50,7 @@ int video_monitor_count(void) { if (!g_nmons) list_monitors(); return g_nmons; }
 const char *video_monitor_name(int i) { if (!g_nmons) list_monitors(); return i >= 0 && i < g_nmons ? g_mon_names[i] : "?"; }
 
 /* ---- display mode: window / borderless / exclusive full screen ---- */
+static int g_reclaim_exclusive;
 static int g_mode = -1;              /* 0 window, 1 borderless, 2 exclusive */
 static int g_fullscreen;             /* borderless or exclusive */
 static RECT g_window_rect;
@@ -103,6 +106,11 @@ void video_set_fullscreen(int on) { video_apply_display(on ? 1 : 0, 1, 0); }
 static int g_keyq[32];
 static int g_keyq_n;
 static void push_key(int vk) { if (g_keyq_n < 32) g_keyq[g_keyq_n++] = vk; }
+void video_inject_key(int vk) { push_key(vk); }
+void video_test_defocus(int away) {    /* like Alt+Tab to the desktop and back (tests) */
+    if (away) SetForegroundWindow(GetShellWindow()); else { ShowWindow(g_wnd, SW_RESTORE); SetForegroundWindow(g_wnd); }
+}
+void video_test_minimize(int on) { ShowWindow(g_wnd, on ? SW_MINIMIZE : SW_RESTORE); if (!on) SetForegroundWindow(g_wnd); }
 int video_pop_key(void) {
     if (!g_keyq_n) return 0;
     int vk = g_keyq[0];
@@ -110,7 +118,6 @@ int video_pop_key(void) {
     return vk;
 }
 
-static int g_reclaim_exclusive;
 static LRESULT CALLBACK wndproc(HWND h, UINT m, WPARAM w, LPARAM l) {
     switch (m) {
     case WM_CLOSE: g_closing = 1; return 0;
@@ -152,14 +159,15 @@ int video_init(const char *title, int w, int h) {
     QueryPerformanceCounter(&g_last);
     timeBeginPeriod(1);              /* 1 ms Sleep granularity (default is ~15.6 ms) */
     if (!g_wnd) return 0;
-    g_hz = display_hz();
-    g_use_d3d = d3d_init(g_wnd, g_hz, g_gpu_choice);
+    g_hz = getenv("FGT_FORCE_HZ") ? atoi(getenv("FGT_FORCE_HZ")) : display_hz();   /* tests: act as on another display */
+    g_use_d3d = getenv("FGT_FORCE_GDI") ? 0 : d3d_init(g_wnd, g_hz, g_gpu_choice);
     rt_log("video: display %d Hz, drawing with %s", g_hz, g_use_d3d ? "Direct3D 11" : "GDI");
     return 1;
 }
 
 int video_present(const uint32_t *rgb, int w, int h, const HdFrame *hd) {
     MSG msg;
+    watchdog_beat();
     while (PeekMessageA(&msg, NULL, 0, 0, PM_REMOVE)) { TranslateMessage(&msg); DispatchMessageA(&msg); }
     if (g_closing) return 0;
     if (g_reclaim_exclusive) {
@@ -168,17 +176,29 @@ int video_present(const uint32_t *rgb, int w, int h, const HdFrame *hd) {
     }
     g_hd_used = 0;
     if (g_use_d3d) {
-        if (hd && g_hd_enabled) {
-            int r = d3d_present_hd(hd);
+        static long test_fail = -2, frames;
+        if (test_fail == -2) test_fail = getenv("FGT_TEST_D3D_FAIL") ? atol(getenv("FGT_TEST_D3D_FAIL")) : -1;
+        int ok;
+        if (++frames == test_fail) { rt_log("video: simulating a Direct3D failure"); ok = 0; }
+        else {
+            int r = (hd && g_hd_enabled) ? d3d_present_hd(hd) : -1;
             if (r == 1) { g_hd_used = 1; return 1; }
-            if (r == 0) { rt_log("video: Direct3D failed, drawing with GDI"); d3d_shutdown(); g_use_d3d = 0; goto gdi; }
+            ok = r == 0 ? 0 : d3d_present(rgb, w, h);
         }
-        if (d3d_present(rgb, w, h)) return 1;
-        rt_log("video: Direct3D failed, drawing with GDI");
-        d3d_shutdown();              /* device lost or similar: carry on with GDI */
+        if (ok) return 1;
+        /* device lost (driver update or crash, graphics card switched...): start Direct3D again. GDI is the last
+         * resort: it can't draw the menu, and its picture can stay hidden behind the old swap chain's. */
+        static int restarts;
+        d3d_shutdown();
+        if (restarts < 5 && d3d_init(g_wnd, g_hz, g_gpu_choice)) {
+            restarts++;
+            rt_log("video: Direct3D failed; started it again");
+            if (g_mode == 2) g_reclaim_exclusive = 1;
+            return 1;
+        }
+        rt_log("video: Direct3D failed for good, drawing with GDI (no menu)");
         g_use_d3d = 0;
     }
-gdi:
     g_bmi.bmiHeader.biSize = sizeof g_bmi.bmiHeader;
     g_bmi.bmiHeader.biWidth = w;
     g_bmi.bmiHeader.biHeight = -h;
@@ -231,7 +251,7 @@ void video_wait_frame(void) {
             g_vsync_checked = 1;
             HMODULE h = LoadLibraryA("dwmapi.dll");
             if (h && g_hz >= 59 && g_hz <= 61) g_dwm_flush = (DwmFlushFn)(void *)GetProcAddress(h, "DwmFlush");
-            rt_log("video: GDI path, %s", g_dwm_flush ? "vsync via DwmFlush" : "60 Hz timer");
+            rt_log("video: %s, %s", g_use_d3d ? "Direct3D without vsync" : "GDI path", g_dwm_flush ? "vsync via DwmFlush" : "60 Hz timer");
         }
         if (g_dwm_flush) g_dwm_flush();
         else { video_pace(); QueryPerformanceCounter(&last); return; }
@@ -248,3 +268,7 @@ void video_wait_frame(void) {
 int video_take_repeats(void) { return g_use_d3d ? d3d_take_repeats() : -1; }
 
 int video_hd_used(void) { return g_hd_used; }
+
+int ui_d3d_failed(void);
+/* the overlay (menu) can be drawn: Direct3D is running and the overlay renderer works */
+int video_menu_drawable(void) { return g_use_d3d && !ui_d3d_failed(); }

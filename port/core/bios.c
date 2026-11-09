@@ -168,8 +168,9 @@ static void thread_entry(void *arg) {
 static uint32_t open_thread(uint32_t pc, uint32_t sp, uint32_t gp) {
     if (!g_th[0].used) { g_th[0].used = 1; g_th[0].coro = coro_init_main(); }
     for (int i = 1; i < MAX_THREADS; i++)
-        if (!g_th[i].used) {
+        if (!g_th[i].used && i != g_cur_th) {  /* a thread that closed itself is still running: not yet */
             Thread *t = &g_th[i];
+            if (t->coro) coro_destroy(t->coro);   /* the previous thread in this slot (it closed itself) */
             memset(t, 0, sizeof *t);
             t->used = 1;
             t->pc = pc;
@@ -179,6 +180,7 @@ static uint32_t open_thread(uint32_t pc, uint32_t sp, uint32_t gp) {
             rt_log("OpenTh(pc=%08X sp=%08X gp=%08X) -> %d", pc, sp, gp, i);
             return 0xFF000000u | (uint32_t)i;
         }
+    rt_log("OpenTh(pc=%08X): no free thread", pc);
     return 0xFFFFFFFFu;
 }
 
@@ -218,9 +220,15 @@ void bios_call(int table, uint32_t fn) {
     case 0xB00C: g_events[R(4) & 31].enabled = 1; R(2) = 1; return;
     case 0xB00D: g_events[R(4) & 31].enabled = 0; R(2) = 1; return;
     case 0xB00E: R(2) = open_thread(R(4), R(5), R(6)); return;
-    case 0xB00F: if ((R(4) & 0xFFFF) > 0 && (R(4) & 0xFFFF) < MAX_THREADS && (int)(R(4) & 0xFFFF) != g_cur_th)
-                     g_th[R(4) & 0xFFFF].used = 0;
-                 R(2) = 1; return;
+    case 0xB00F:                                            /* CloseTh */
+        /* A thread may close itself (the game's stage loader does, every stage): its slot is free from now on,
+         * and its host coroutine is freed when the slot is next used (it is still running now). Ignoring
+         * this leaked a slot per stage until OpenTh failed and the game hung on a black screen. */
+        if ((R(4) & 0xFFFF) > 0 && (R(4) & 0xFFFF) < MAX_THREADS) {
+            rt_log("CloseTh(%d)%s", (int)(R(4) & 0xFFFF), (int)(R(4) & 0xFFFF) == g_cur_th ? " (itself)" : "");
+            g_th[R(4) & 0xFFFF].used = 0;
+        }
+        R(2) = 1; return;
     case 0xB010: change_thread(R(4)); return;
     case 0xB056: R(2) = 0x674; return;                      /* GetC0Table: kernel RAM, unused by HLE */
     case 0xB057: R(2) = 0x874; return;                      /* GetB0Table */

@@ -14,7 +14,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef struct { long frame, hold; int kind; int player; uint16_t bit; char name[64]; } Cmd;
+typedef struct { long frame, hold; int kind; int player; uint16_t bit; char name[260]; } Cmd;
 enum { K_PLAYER, K_COIN1, K_COIN2, K_TEST, K_SERVICE, K_SHOT, K_SET };
 
 static Cmd *cmds;
@@ -39,14 +39,14 @@ static int parse_input(const char *s, Cmd *c) {
 int script_load(const char *path) {
     FILE *f = fopen(path, "r");
     if (!f) { fprintf(stderr, "cannot open script %s\n", path); return 0; }
-    char line[256];
+    char line[512];
     int lineno = 0;
     while (fgets(line, sizeof line, f)) {
         lineno++;
         char *h = strchr(line, '#');
         if (h) *h = 0;
-        char a[64], b[64], c[64];
-        int n = sscanf(line, "%63s %63s %63s", a, b, c);
+        char a[64], b[64], c[260];
+        int n = sscanf(line, "%63s %63s %259s", a, b, c);
         if (n <= 0) continue;
         if (n < 3) { fprintf(stderr, "%s:%d: expected 3 fields\n", path, lineno); continue; }
         Cmd cmd;

@@ -266,11 +266,14 @@ void uip_art(float x, float y, float w, float h, float radius, float alpha) {
 }
 
 static int utf8_next(const char **p) {
+    /* never steps past the terminating zero, even in a sequence cut short (a name truncated mid-character) */
     const unsigned char *s = (const unsigned char *)*p;
-    int c = *s++;
-    if (c >= 0xF0) { c = ((c & 7) << 18) | ((s[0] & 63) << 12) | ((s[1] & 63) << 6) | (s[2] & 63); s += 3; }
-    else if (c >= 0xE0) { c = ((c & 15) << 12) | ((s[0] & 63) << 6) | (s[1] & 63); s += 2; }
-    else if (c >= 0xC0) { c = ((c & 31) << 6) | (s[0] & 63); s += 1; }
+    int c = *s++, more = c >= 0xF0 ? 3 : c >= 0xE0 ? 2 : c >= 0xC0 ? 1 : 0;
+    if (more) c &= more == 3 ? 7 : more == 2 ? 15 : 31;
+    for (; more > 0; more--) {
+        if ((*s & 0xC0) != 0x80) { c = '?'; break; }
+        c = (c << 6) | (*s++ & 63);
+    }
     *p = (const char *)s;
     return c;
 }
@@ -315,6 +318,7 @@ static int ubuf_cap;
 static ID3D11BlendState *ublend;
 static ID3D11SamplerState *usamp;
 static int g_ui_failed;
+int ui_d3d_failed(void) { return g_ui_failed; }
 
 static const char k_ui_shader[] =
     "cbuffer C : register(b0) { float2 screen; float2 pad; };\n"

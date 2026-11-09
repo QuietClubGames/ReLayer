@@ -1,5 +1,22 @@
 # ReLayer release notes
 
+## 0.1.1
+
+Fixes for freezes. Updating is recommended: install it over 0.1.0 (settings are kept).
+
+- **Black screen after a fight or two in arcade mode.** The game's stage loader runs as a task that ends
+  itself; ReLayer never freed its slot, so after a few stages there was no room to start the next one and the
+  game sat on a black screen. Fixed, and tested with full arcade runs to the ending for every fighter.
+- **Picture froze when switching to exclusive full screen** (from the menu, Alt+Enter / F11, or Alt+Tab back
+  to the game). Fixed.
+- **Controls stopped working after using the menu** with a controller that always reports a button as held
+  (a resting trigger, some fight sticks, a second device). The game now listens again after half a second.
+- If the graphics driver resets or Direct3D fails, ReLayer starts Direct3D again instead of falling back to
+  a mode without the menu. PCs without a usable graphics card use Windows' software renderer (original
+  graphics only) rather than a mode where the menu could not be shown.
+- If the picture ever stops for 3 seconds, `fgtlayer.log` now records what the game was doing, and a restart
+  from the menu keeps the previous log as `fgtlayer.old.log`. Please attach both when reporting a freeze.
+
 ## 0.1.0 (first public release)
 
 ReLayer is an unofficial PC port of Fighting Layer (Arika / Namco, 1998). It does not include the game:

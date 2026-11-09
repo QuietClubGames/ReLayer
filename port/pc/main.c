@@ -17,6 +17,7 @@
 #include "script.h"
 #include "pad.h"
 #include "menu_host.h"
+#include "watchdog.h"
 #include "../ui/ui.h"
 #include "../ui/settings.h"
 #include "game.h"
@@ -302,6 +303,130 @@ static void disable_power_throttling(void) {
     rt_log("power throttling opt-out: %s", ok ? "ok" : "not available");
 }
 
+/* FGT_STRESS=<start frame>:<steps>: while the game runs, switch display modes and open the menu over and over
+ * (one action every few frames, keys sent the way the keyboard sends them). Exits when done. */
+static void stress_tick(void) {
+    static int checked, start, steps, step, wait, phase;
+    static unsigned seed = 12345, act;
+    static long t;
+    if (!checked) {
+        const char *e = getenv("FGT_STRESS");
+        checked = 1;
+        if (!e || sscanf(e, "%d:%d", &start, &steps) != 2) steps = 0;
+    }
+    if (!steps || (long)g_frame < start) return;
+    {   /* FGT_STRESS_KEYS=k1,k2,...: one key every 20 frames (hex virtual-key codes) */
+        static const char *e;
+        static int checked2;
+        if (!checked2) { checked2 = 1; e = getenv("FGT_STRESS_KEYS"); }
+        if (e) {
+            if (++t < 20) return;
+            t = 0;
+            if (!*e) return;
+            int vk = (int)strtol(e, (char **)&e, 16);
+            if (*e == ',') e++;
+            rt_log("stress key %02X at frame %llu", vk, (unsigned long long)g_frame);
+            video_inject_key(vk);
+            return;
+        }
+    }
+    {   /* FGT_STRESS_COMBOS: every display mode x graphics x quality x filter x shape, set directly, 20 frames each,
+         * with the window minimised and restored at every display mode */
+        static int combos = -1, c;
+        if (combos < 0) combos = getenv("FGT_STRESS_COMBOS") != NULL;
+        if (combos) {
+            if (++t < wait) return;
+            t = 0;
+            wait = 20;
+            int total = 3 * 7 * 3 * 3;
+            if (getenv("FGT_STRESS_ALTTAB") && c < total) c = total + 6;   /* only the focus test */
+            if (c >= total + 6 && c < total + 6 + 20) {   /* exclusive full screen, focus away and back 10 times */
+                if (c == total + 6) { g_settings.display_mode = DISPLAY_EXCLUSIVE; menu_host_apply(); }
+                video_test_defocus((c - total) % 2 == 0);
+                rt_log("stress: focus %s", (c - total) % 2 == 0 ? "away" : "back");
+                c++;
+                wait = 60;
+                return;
+            }
+            if (c == total + 26) { rt_log("stress done"); exit(0); }
+            if (c >= total) {              /* finally: minimise and restore, in each display mode */
+                int m = (c - total) / 2;
+                if ((c - total) % 2 == 0) { g_settings.display_mode = m; menu_host_apply(); video_test_minimize(1); wait = 90; }
+                else { video_test_minimize(0); wait = 90; }
+                rt_log("stress: display %d, %s", m, (c - total) % 2 ? "restored" : "minimised");
+                c++;
+                return;
+            }
+            int v = c++;
+            g_settings.aspect = v % 3; v /= 3;
+            g_settings.filter = v % 3; v /= 3;
+            int q = v % 7; v /= 7;         /* 0-5 quality with enhanced graphics, 6 = original graphics */
+            g_settings.enhanced = q < 6;
+            if (q < 6) g_settings.quality = q;
+            g_settings.display_mode = v;
+            menu_host_apply();
+            if (c % 9 == 1) rt_log("stress combo %d/%d at frame %llu", c, total, (unsigned long long)g_frame);
+            return;
+        }
+    }
+    {   /* FGT_STRESS_SWEEP: instead of random actions, every option of the Display, Audio, Controls and Game pages,
+         * one at a time: open the menu, step through its values (or toggle it twice), close, let the fight run */
+        static int sweep = -1, n, k;
+        static int keys[4000][2];                  /* key, frames to wait after it */
+        if (sweep < 0) {
+            sweep = getenv("FGT_STRESS_SWEEP") != NULL;
+            if (sweep) {
+#define K(v, w) do { if (n < 4000) { keys[n][0] = (v); keys[n][1] = (w); n++; } } while (0)
+                static const int rows[4] = {10, 2, 11, 11};
+                for (int pg = 0; pg < 4; pg++)
+                    for (int r = 0; r < rows[pg] + 1; r++) {
+                        K(-1, 10);
+                        if (r) K(VK_DOWN, 4);
+                        for (int i = 0; i < 6; i++) K(VK_RIGHT, 12);        /* every value of a choice / slider */
+                        K(VK_RETURN, 12);                                   /* toggles, and a button capture... */
+                        K(-3, 8);                                           /* ...cancelled */
+                        K(VK_RETURN, 12);
+                        K(-3, 8);
+                        for (int i = 0; i < 3; i++) K(VK_LEFT, 12);
+                        K(-2, 45);                                          /* close, the fight runs */
+                        if (r == rows[pg]) { K(-1, 10); K('E', 8); K(-2, 30); }   /* next page */
+                    }
+#undef K
+                rt_log("stress sweep: %d key presses", n);
+            }
+        }
+        if (sweep) {
+            if (++t < wait) return;
+            t = 0;
+            if (k == n) { rt_log("stress done"); exit(0); }
+            if (k % 20 == 0) rt_log("stress sweep %d/%d at frame %llu", k, n, (unsigned long long)g_frame);
+            int v = keys[k][0];                    /* -1 open, -2 close, -3 cancel a button capture (if any) */
+            if (v == -1) v = ui_menu_wants_pause() ? 0 : VK_TAB;
+            else if (v == -2) v = ui_menu_wants_pause() ? VK_TAB : 0;
+            else if (v == -3) v = menu_host_capturing() ? VK_ESCAPE : 0;
+            if (v) video_inject_key(v);
+            wait = keys[k][1];
+            k++;
+            return;
+        }
+    }
+    if (++t < wait) return;
+    t = 0;
+    if (phase == 0) {
+        if (step == steps) { rt_log("stress done"); exit(0); }
+        seed = seed * 1103515245u + 12345u;
+        act = (seed >> 16) % 5;
+        wait = 1 + (int)((seed >> 8) % 40);
+        rt_log("stress %d at frame %llu: %s, %d frames apart", step, (unsigned long long)g_frame,
+               (const char *[]){"F11", "menu open/close", "menu display mode", "menu open + F11", "F9"}[act], wait);
+        step++;
+    }
+    static const int seq[5][4] = {{VK_F11}, {VK_TAB, VK_TAB}, {VK_TAB, VK_RIGHT, VK_TAB}, {VK_TAB, VK_F11, VK_TAB}, {VK_F9}};
+    int vk = phase < 4 ? seq[act][phase] : 0;
+    if (vk) { video_inject_key(vk); phase++; }
+    if (!vk || phase == 4 || !seq[act][phase]) phase = 0;
+}
+
 void plat_vblank(void) {
     {
         LARGE_INTEGER now, freq;
@@ -349,6 +474,17 @@ void plat_vblank(void) {
         }
     }
     if (!g_headless) {
+        char st[160];
+        snprintf(st, sizeof st, "frame %llu, menu %s, display %d, enhanced %d, quality %d, filter %d",
+                 (unsigned long long)g_frame, ui_menu_visible() ? "open" : "closed", g_settings.display_mode,
+                 g_settings.enhanced, g_settings.quality, g_settings.filter);
+        watchdog_note(st);
+        {   /* FGT_TEST_HANG=<frame>: stall for 5 seconds there (checks the watchdog) */
+            static long hang = -2;
+            if (hang == -2) hang = getenv("FGT_TEST_HANG") ? atol(getenv("FGT_TEST_HANG")) : -1;
+            if ((long)g_frame == hang) Sleep(5000);
+        }
+        stress_tick();
         menu_host_frame(1.0f / 60.0f);
         static const char *demo;
         static int demo_checked;
@@ -379,7 +515,7 @@ void plat_vblank(void) {
             MEM_W8(addr, (uint8_t)value);
             rt_log("script: poke %08X = %d", addr, value);
         } else if (set[0] == '!') {                                               /* vram dump */
-            char path[128];
+            char path[300];
             snprintf(path, sizeof path, "%s.vram", set + 1);
             FILE *f = fopen(path, "wb");
             if (f) { fwrite(g_vram, sizeof g_vram, 1, f); fclose(f); }
@@ -395,7 +531,7 @@ void plat_vblank(void) {
     {
         const char *shot = script_shot((long)g_frame);
         if (shot) {
-            char path[128];
+            char path[300];
             snprintf(path, sizeof path, "%s.bmp", shot);
             write_rgb_bmp(path, g_screen, g_screen_w, g_screen_h);
             rt_log("screenshot %s at frame %llu", path, (unsigned long long)g_frame);
@@ -407,7 +543,7 @@ void plat_vblank(void) {
     audio_frame();
     QueryPerformanceCounter(&t1);
     if (!g_headless) {
-        static char bb_path[160];
+        static char bb_path[300];
         if (g_pending_hd_shot) {            /* also what reaches the window (filters, menu): <name>_screen.bmp */
             snprintf(bb_path, sizeof bb_path, "%s_screen.bmp", g_pending_hd_shot);
             d3d_request_backbuffer_save(bb_path);
@@ -415,7 +551,7 @@ void plat_vblank(void) {
         if (!video_present(g_screen, g_screen_w, g_screen_h, gpu_hd_frame())) exit(0);
         if (video_hd_used()) g_hd_frames++;
         if (g_pending_hd_shot) {
-            char path[160];
+            char path[300];
             snprintf(path, sizeof path, "%s_hd.bmp", g_pending_hd_shot);
             if (video_hd_used() && hd_d3d_save(path)) rt_log("screenshot %s (high resolution)", path);
             g_pending_hd_shot = NULL;
@@ -451,6 +587,7 @@ void plat_vblank(void) {
         /* menu open: the game stays paused here, the frozen frame keeps being shown under the menu */
         while (ui_menu_wants_pause()) {
             pad_poll();
+            stress_tick();
             menu_host_frame(1.0f / 60.0f);
             if (!video_present(g_screen, g_screen_w, g_screen_h, gpu_hd_frame())) exit(0);
             video_wait_frame();
@@ -518,7 +655,7 @@ int main(int argc, char **argv) {
     }
     if (!g_headless && !g_mute) audio_init(S12SND_OUT_RATE);
     if (!g_headless || getenv("FGT_FAKE_PAD")) pad_init("controls.ini");
-    if (!g_headless) menu_host_init();          /* applies the settings (full screen, graphics, volume...) */
+    if (!g_headless) { watchdog_start(); menu_host_init(); }          /* applies the settings (full screen, graphics, volume...) */
     g_unlock_all = g_settings.unlock_all;
     if (g_cli_scale) { extern int g_hd_scale_override; g_hd_scale_override = g_cli_scale; }
     if (g_wav_path) wav_open(g_wav_path, S12SND_OUT_RATE);

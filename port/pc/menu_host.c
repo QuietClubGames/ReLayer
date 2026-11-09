@@ -8,6 +8,7 @@
 #include "pad.h"
 #include "video.h"
 #include "../core/log.h"
+#include "../core/hw.h"
 #include "d3d11_present.h"
 #include "game.h"
 #include <windows.h>
@@ -80,6 +81,9 @@ static void host_restart(void) {
     STARTUPINFOA si = {sizeof si};
     PROCESS_INFORMATION pi;
     char *cmd = GetCommandLineA();
+    rt_log("restarting");
+    eeprom_flush();
+    rt_log_close();                 /* so the new copy can keep this run's log as fgtlayer.old.log */
     if (CreateProcessA(exe, cmd, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi)) {
         CloseHandle(pi.hProcess);
         CloseHandle(pi.hThread);
@@ -110,6 +114,17 @@ static int g_prev_dir;
 static float g_dir_timer;
 static int g_combo_latched;
 static int g_prev_connected[2];
+
+/* Open or close the menu. Without Direct3D it can't be drawn, and an invisible menu would pause the game
+ * for no visible reason (it looks like a freeze), so then it doesn't open. */
+static void menu_toggle(int dev) {
+    if (!ui_menu_visible() && !video_menu_drawable()) {
+        static int told;
+        if (!told) { told = 1; rt_log("menu: can't be shown without Direct3D, not opened"); }
+        return;
+    }
+    ui_menu_toggle(dev);
+}
 
 /* Alt+Enter / F11: window <-> the full-screen mode last used (borderless unless exclusive was chosen) */
 static int g_last_full = DISPLAY_BORDERLESS;
@@ -161,7 +176,7 @@ static void keyboard(void) {
             continue;
         }
         if (!ui_menu_visible() || !ui_menu_wants_pause()) {
-            if (vk == VK_ESCAPE || vk == VK_TAB) ui_menu_toggle(UI_DEV_KEYBOARD);
+            if (vk == VK_ESCAPE || vk == VK_TAB) menu_toggle(UI_DEV_KEYBOARD);
             continue;
         }
         switch (vk) {
@@ -221,7 +236,7 @@ static void controller(float dt) {
 
     /* coin + start together opens or closes the menu */
     if ((held & coin_bit) && (held & start_bit) && (pressed & (coin_bit | start_bit)) && !g_combo_latched) {
-        ui_menu_toggle(UI_DEV_PAD);
+        menu_toggle(UI_DEV_PAD);
         g_combo_latched = 1;
     }
     if (!(held & (coin_bit | start_bit))) g_combo_latched = 0;
@@ -266,10 +281,21 @@ void menu_host_frame(float dt) {
 
 /* While the menu has just closed, keep the button that closed it away from the game. */
 int menu_host_input_blocked(void) {
-    static int blocked;
-    if (ui_menu_wants_pause()) { blocked = 1; return 1; }
-    if (blocked && pad_held_all() == 0) blocked = 0;
+    /* Only briefly: a controller that always reports something held (a resting trigger, a fight stick's
+     * switch, a second device) would otherwise leave the game ignoring every control after the menu. */
+    static int blocked, frames;
+    if (ui_menu_wants_pause()) { blocked = 1; frames = 0; return 1; }
+    if (!blocked) return 0;
+    uint32_t held = pad_held_all();
+    if (!held) blocked = 0;
+    else if (++frames > 30) {
+        rt_log("menu: controller still reports buttons %08X held after closing the menu; controls back anyway",
+               (unsigned)held);
+        blocked = 0;
+    }
     return blocked;
 }
 
 void menu_host_cancel_capture(void) { g_capture = -1; }
+int menu_host_capturing(void) { return g_capture >= 0; }
+void menu_host_apply(void) { apply(1); }

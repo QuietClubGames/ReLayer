@@ -14,6 +14,10 @@ void video_wait_frame(void); /* wait for the next frame: display vsync at ~60 Hz
 int  video_take_repeats(void); /* frames shown twice since last call (Direct3D only, else -1) */
 void video_set_fullscreen(int on);  /* borderless full screen; Alt+Enter / F11 toggle it */
 int  video_pop_key(void);      /* next queued key press (virtual-key code), 0 if none */
+void video_inject_key(int vk);
+int  video_menu_drawable(void);  /* 0: no Direct3D, the menu can't be shown */
+void video_test_minimize(int on);
+void video_test_defocus(int away);  /* minimise / restore the window (tests) */ /* queue a key press as if typed (tests) */
 void video_apply_display(int mode, int window_size, int monitor);   /* 0 window, 1 borderless, 2 exclusive */
 int  video_monitor_count(void);
 const char *video_monitor_name(int index);

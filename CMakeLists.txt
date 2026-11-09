@@ -46,6 +46,7 @@ add_executable(fgtlayer
   port/pc/gpu_hd_d3d11.c
   port/pc/ui_d3d11.c
   port/pc/menu_host.c
+  port/pc/watchdog.c
   port/ui/menu.c
   port/ui/settings.c
   src/game/release.c

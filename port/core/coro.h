@@ -7,3 +7,4 @@ typedef struct Coro Coro;
 Coro *coro_init_main(void);
 Coro *coro_create(void (*fn)(void *), void *arg, size_t stack_size);
 void  coro_switch(Coro *to);
+void  coro_destroy(Coro *c);   /* free a coroutine that is not running */

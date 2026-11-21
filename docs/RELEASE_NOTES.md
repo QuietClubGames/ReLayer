@@ -1,5 +1,34 @@
 # ReLayer release notes
 
+## 0.1.3
+
+New: **Uncensored**, the original Japanese version of the game. Install it over 0.1.2 (settings are kept).
+
+Fighting Layer came out in Japan first. The World version, the ROM most people have, is the same program set
+to a different region, and with a hidden arcade setting called Regulation switched on. Together they tone the
+game down. ReLayer now plays the World ROM as the Japanese machine does, so you get the uncut game without
+needing the Japanese ROM:
+
+| | World version | Uncensored (Japanese version) |
+|---|---|---|
+| Sessyu | a stick | his sword |
+| Janis | sticks | her knives |
+| Hit sparks | green | red |
+| Fire and light effects | purple | their normal colours |
+| Winning with a super move | nothing | the "SUPER FINISH!" banner |
+| Blair | a covered-up outfit | her original costume |
+| Lan, Clemence and Blair | stiff | chest physics |
+| Moves Regulation switches off (Preston Ajax's mines, Joe's "Evil Judge" super, some of Vold's specials, as documented by The Cutting Room Floor) | off | on |
+| Tetsuo Kato | called "Kato" | called "Tetsuo" |
+
+- It is **on by default**. To play the World version, open the menu, go to the **Game** page and switch
+  **Uncensored** off. It takes effect at once; restart the game (System page) to see the start-up screens change.
+- The game stays in **English**: the Japanese version has the same English text and the same voices.
+- With it on, the game starts with the Japanese machine's notice ("This game is for use exclusively in Japan")
+  and the Namco logo, as the Japanese arcade did. That's normal.
+- The arcade's own operator menu shows two extra rows in this mode, HIT COLOR and REGULATION. ReLayer's
+  Uncensored option sets both, so changing them there has no effect while it is on.
+
 ## 0.1.2
 
 The same game as 0.1.1; only the installer changed. Some antivirus programs, Windows Defender included,

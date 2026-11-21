@@ -1,8 +1,8 @@
 1 ICON "fgtlayer.ico"
 
 1 VERSIONINFO
-FILEVERSION 0,1,2,0
-PRODUCTVERSION 0,1,2,0
+FILEVERSION 0,1,3,0
+PRODUCTVERSION 0,1,3,0
 FILEOS 0x40004
 FILETYPE 0x1
 BEGIN
@@ -12,12 +12,12 @@ BEGIN
     BEGIN
       VALUE "CompanyName", "QuietClubGames"
       VALUE "FileDescription", "ReLayer (Fighting Layer PC port)"
-      VALUE "FileVersion", "0.1.2"
+      VALUE "FileVersion", "0.1.3"
       VALUE "InternalName", "ReLayer"
       VALUE "LegalCopyright", "ReLayer code: MIT license. Fighting Layer is a trademark of its owners."
       VALUE "OriginalFilename", "ReLayer.exe"
       VALUE "ProductName", "ReLayer"
-      VALUE "ProductVersion", "0.1.2"
+      VALUE "ProductVersion", "0.1.3"
     END
   END
   BLOCK "VarFileInfo"

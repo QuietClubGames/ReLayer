@@ -19,6 +19,7 @@ typedef struct {
     int volume;           /* 0-100 */
     int mute;
     int unlock_all;       /* secret characters available from the start */
+    int uncensored;       /* 1 = the Japanese version (region Japan, Regulation off, red sparks) */
 } Settings;
 
 extern Settings g_settings;

@@ -26,6 +26,7 @@ An unofficial PC port of Arika's 1998 arcade fighter.
 | **Sharper 3D** | Redrawn on your graphics card at up to 8x the arcade's resolution, without the original's wobbling polygons and warping textures. Or keep the original picture (F9 switches). |
 | **Your screen, your way** | Window, borderless or exclusive full screen; 4:3, stretched or pixel-perfect scaling; sharp, smooth or scanline filter. |
 | **Controllers** | Xbox-style controllers for two players, keyboard, and button remapping. |
+| **Uncensored** | The original Japanese version, unlocked from the ROM you already have: real blades for Sessyu and Janis, red hit sparks, Blair's original costume and the rest of what the World version toned down. Switch it off for the World version. |
 | **Arcade settings** | Difficulty, damage, round timer, rounds and free play, all from an in-game menu, plus an option to unlock the three time-release characters from the start. |
 | **Native** | Not an emulator: the arcade code is recompiled into a Windows program. |
 
@@ -62,7 +63,7 @@ keyboard. The game pauses while the menu is open.
 | **Display** | Window / borderless / exclusive full screen, window size, monitor, picture shape, enhanced or original graphics, quality, screen filter, frame-rate counter |
 | **Audio** | Volume, mute |
 | **Controls** | Remap any button, stick dead zone, restore defaults |
-| **Game** | Unlock all characters, free play, difficulty, damage, round timer, rounds and the arcade's other settings |
+| **Game** | Unlock all characters, uncensored, free play, difficulty, damage, round timer, rounds and the arcade's other settings |
 | **System** | Resume, the arcade's operator menu, restart, quit |
 
 ## Controls
@@ -101,6 +102,18 @@ by portable code. This happens on your PC when you install, from your own ROM.
 The MAME set `fgtlayer.zip`, Fighting Layer (World, Ver. A). Any MAME version's set works: Setup checks the
 twelve ROM chips by checksum, whatever they are named. No BIOS file is needed. Please don't ask where to get
 it.
+</details>
+
+<details>
+<summary><b>What does "Uncensored" change?</b></summary>
+
+Fighting Layer was released in Japan first; the World version is the same program with a region setting that
+tones it down, plus a hidden operator setting, Regulation, kept switched on. ReLayer's **Uncensored** option
+(Game page, on by default) plays it as the Japanese machine does: Sessyu's sword and Janis's knives instead of
+sticks, red hit sparks instead of green, the normal colours for fire and light effects, the "SUPER FINISH!"
+banner, Blair's original costume, the chest physics of Lan, Clemence and Blair, moves that Regulation switches
+off, and Tetsuo Kato's full first name. It also shows the Japanese machine's start-up notice and the Namco logo.
+No Japanese ROM is needed: everything is in the World ROM.
 </details>
 
 <details>

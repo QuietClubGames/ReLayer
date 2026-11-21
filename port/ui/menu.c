@@ -71,6 +71,7 @@ ACCESS(fps, show_fps)
 ACCESS(volume, volume)
 ACCESS(mute, mute)
 ACCESS(unlock, unlock_all)
+ACCESS(uncensored, uncensored)
 static int get_graphics(void) { return g_settings.enhanced ? 0 : 1; }
 static void set_graphics(int v) { g_settings.enhanced = v == 0; H->settings_changed(); }
 static int get_textures(void) { return g_settings.perspective ? 0 : 1; }
@@ -164,6 +165,7 @@ static const Item k_controls[] = {
 };
 static const Item k_game[] = {
     TOGGLE("Unlock all characters", "Preston Ajax, Clemence Keliber and Joe Fendi, which the arcade released after 15 to 43 days.", get_unlock, set_unlock),
+    TOGGLE("Uncensored", "The original Japanese version: red hit sparks, real blades, the fire colours and KO banners. Off is the World version.", get_uncensored, set_uncensored),
     TOGGLE("Free play", "No coins needed: press Start to play.", get_free_play, set_free_play),
     CHOICE("Difficulty", "How strong the computer opponents are. The arcade default is 3.", get_difficulty, set_difficulty, k_levels8, NULL),
     CHOICE("Damage", "How much health each hit takes. The arcade default is 4.", get_damage, set_damage, k_levels8, NULL),

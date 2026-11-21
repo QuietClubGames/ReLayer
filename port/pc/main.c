@@ -459,6 +459,7 @@ void plat_vblank(void) {
     grab_display();
     pad_poll();
     coin_update();
+    uncensored_frame();
     if (g_test_pulse > 0) g_test_pulse--;
     {   /* debug: FGT_RAM_DUMP=<frame>:<path> writes the 4 MB RAM image at that frame */
         static long dump_frame = -2;
@@ -657,6 +658,11 @@ int main(int argc, char **argv) {
     if (!g_headless || getenv("FGT_FAKE_PAD")) pad_init("controls.ini");
     if (!g_headless) { watchdog_start(); menu_host_init(); }          /* applies the settings (full screen, graphics, volume...) */
     g_unlock_all = g_settings.unlock_all;
+    g_uncensored = g_settings.uncensored;
+    {   /* FGT_UNCENSORED=0/1 overrides settings.ini (tests) */
+        const char *e = getenv("FGT_UNCENSORED");
+        if (e && *e) g_uncensored = atoi(e) != 0;
+    }
     if (g_cli_scale) { extern int g_hd_scale_override; g_hd_scale_override = g_cli_scale; }
     if (g_wav_path) wav_open(g_wav_path, S12SND_OUT_RATE);
     hw_init();

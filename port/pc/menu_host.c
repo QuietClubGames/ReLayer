@@ -41,6 +41,7 @@ static void apply(int save) {
     if (g_settings.quality != g_applied_quality) { g_hd_scale_cap = 8; g_applied_quality = g_settings.quality; }
     g_aspect_mode = g_settings.aspect;
     g_unlock_all = g_settings.unlock_all;
+    g_uncensored = g_settings.uncensored;
     g_hd_enabled = g_settings.enhanced;
     g_hd_scale_override = settings_quality_scale(g_settings.quality);
     g_hd_affine = !g_settings.perspective;

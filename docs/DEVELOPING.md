@@ -150,6 +150,13 @@ The previous run's log is kept as `fgtlayer.old.log`.
 | `tests/opmenu_game.txt`, `tests/opmenu_coin.txt` | the operator menu's GAME and COIN pages |
 | `tests/stress_fight.txt` | a long fight with player 1 attacking, for the hang tests below (run windowed) |
 
+**Uncensored** (`src/game/uncensored.c`, on by default, also in headless runs) plays the Japanese revision: each
+frame it sets the region byte (0x803689B8) to Japan and copies the Japanese defaults of option bits 19-23
+(Regulation off, red hit colour) into the game-options word at 0x80368CB4. Japan adds a start-up notice and the
+Namco logo, so the attract sequence runs later than in the World version, and the operator menu's GAME OPTIONS
+page gains HIT COLOR and REGULATION (overridden every frame). Scripts written for World timing need
+`FGT_UNCENSORED=0` (it overrides `settings.ini`).
+
 Hang tests (windowed, with `--script tests/stress_fight.txt`; they change `settings.ini`, so keep a copy):
 
 - `FGT_STRESS=2400:300`: 300 random switches (F11, menu display mode, menu open/close, F9) during the fight.

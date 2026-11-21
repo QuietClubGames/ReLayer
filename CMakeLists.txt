@@ -49,7 +49,7 @@ add_executable(fgtlayer
   port/pc/watchdog.c
   port/ui/menu.c
   port/ui/settings.c
-  src/game/release.c
+  src/game/release.c src/game/uncensored.c
   src/game/file_override.c
   src/game/ex_mirror.c
   src/game/ex_ponytail.c

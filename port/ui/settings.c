@@ -12,6 +12,7 @@ void settings_defaults(Settings *s) {
     s->perspective = 1;
     s->volume = 100;
     s->unlock_all = 1;
+    s->uncensored = 1;
 }
 
 int settings_quality_scale(int q) {
@@ -33,6 +34,7 @@ static const struct { const char *key; size_t ofs; int lo, hi; } k_fields[] = {
     {"volume", offsetof(Settings, volume), 0, 100},
     {"mute", offsetof(Settings, mute), 0, 1},
     {"unlock_all_characters", offsetof(Settings, unlock_all), 0, 1},
+    {"uncensored", offsetof(Settings, uncensored), 0, 1},
 };
 
 int settings_load(Settings *s, const char *path) {

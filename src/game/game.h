@@ -10,6 +10,12 @@
  * the board was first switched on (needs the real-time clock). */
 extern int g_unlock_all;
 
+/* ---- uncensored, the Japanese version (uncensored.c) ---- */
+/* 1 = play the game as released in Japan: region Japan, Regulation off, red hit sparks. 0 = the World version.
+ * uncensored_frame() applies it; call it once a frame. */
+extern int g_uncensored;
+void uncensored_frame(void);
+
 /* ---- arcade (operator) settings stored in the EEPROM (arcade_settings.c) ---- */
 enum {
     AS_FREE_PLAY,        /* 0/1 */
